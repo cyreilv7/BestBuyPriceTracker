@@ -5,9 +5,9 @@
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Track an item</legend>
             <div class="form-group">
                 {{ form.url.label(class="form-label") }}
-
                 {% if form.url.errors %}
                     {{ form.url(class="form-control is-invalid")}}
                     <div class="invalid-feedback">
@@ -19,7 +19,6 @@
                 {% else %}
                     {{ form.url(class="form-control") }}
                 {% endif %}
-
             </div>
             {{ form.price_cutoff.label(class="form-label") }}
             <div class="input-group">
