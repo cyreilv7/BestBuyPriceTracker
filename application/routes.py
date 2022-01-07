@@ -61,7 +61,6 @@ def logout():
 @app.route('/currently_tracked', methods=['GET', 'POST'])
 @login_required
 def tracked():
-    pass
     return render_template('tracked.html')
 
 
