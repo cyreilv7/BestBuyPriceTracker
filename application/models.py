@@ -1,0 +1,56 @@
+from application import db, login_manager
+from sqlalchemy.ext.associationproxy import association_proxy
+from flask_login import UserMixin
+
+@login_manager.user_loader
+def user_loader(user_id):
+    return(User.query.get(int(user_id)))
+
+
+class UserProduct(db.Model):
+    user_id = db.Column(db.ForeignKey('user.id'), primary_key=True)
+    product_id = db.Column(db.ForeignKey('product.id'), primary_key=True)
+    price_cutoff = db.Column(db.Integer, nullable=False)
+    user = db.relationship('User', backref='products')
+    product = db.relationship('Product', backref='users')
+
+
+class User(db.Model, UserMixin):    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)
+    # products = db.relationship('Association', back_populates='user', lazy='dynamic')
+
+    def __repr__(self):
+        return self.username
+
+
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    url = db.Column(db.String(500), unique=True, nullable=False)
+    image_file = db.Column(db.String(20), nullable=False, server_default='unavailable.png')
+    # users = db.relationship('Association', back_populates='product', lazy='dynamic')
+
+# dummy data for command line testing
+def dummy_data():
+    u = User(username='test', email='test', password='test')  
+    p = Product(name='product', price=20.2, url='https://www.amazon.com/')
+    a = UserProduct(price_cutoff=15)
+    a.product = p
+    u.products.append(a)
+    db.session.add(u)
+    db.session.add(p)
+    db.session.add(a)
+    db.session.commit()
+
+# class Test(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+
+
+# For use on command line for setting up the database.
+def init_db():
+    db.drop_all()
+    db.create_all()
