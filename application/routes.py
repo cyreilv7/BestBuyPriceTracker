@@ -14,9 +14,10 @@ def index():
         product = Product.query.filter_by(url=form.url.data).first()
         relationship = UserProduct.query.filter_by(
             user=current_user, product=product).first()
-        if product and relationship: 
-            flash('You are already tracking this item', 'danger')
-            return render_template('index.html', form=form)
+        if product:
+            if relationship: 
+                flash('You are already tracking this item', 'danger')
+                return render_template('index.html', form=form)
         else:
             product = Product(name='TestName', price=10.2, url=form.url.data)
             db.session.add(product)
