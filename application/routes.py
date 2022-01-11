@@ -35,13 +35,27 @@ def index():
 @app.route('/currently_tracked', methods=['GET', 'POST'])
 @login_required
 def tracked():
+    # Fetch all products tracked by the user
     products = db.session.query(Product). \
         join(UserProduct). \
         filter(UserProduct.user_id == current_user.id).all()
+    # Create list of file paths to each product's image
     product_image_files = [
-        url_for('static', filename=f.image_file) for f in products]
+        url_for('static', filename=f'product_images/{f.image_file}') for f in products]
     product_attributes = zip(products, product_image_files)
     return render_template('tracked.html', products=products, product_attributes=product_attributes)
+
+@app.route('/stop_tracking<int:product_id>', methods=['GET', 'POST'])
+@login_required
+def stop_tracking(product_id):
+    product = Product.query.get(product_id)
+    relationship = UserProduct.query.filter_by(user=current_user, product=product).first()
+    if not relationship:
+        return redirect(url_for('index'))
+    else:
+        db.session.delete(relationship)
+        db.session.commit()
+    return redirect(url_for('tracked'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
