@@ -1,39 +1,52 @@
 {% extends "layout.html" %}
 
 {% block content %}
-  
+
 <div class="border-bottom mb-4" style="font-size:1.75em">Items Currently Being Tracked</div>
 <ul class="list-group">
-    {% if not products %}
-        <p>You're currently not tracking any items.</p>
-    {% endif %}
-    {% for item, image_file in product_attributes %}
-    <li class="list-group-item">
+  {% if not products %}
+    <p>You're currently not tracking any items.</p>
+  {% else %}
+    {% for product, image_file in product_attributes %}
+      <li class="list-group-item">
         <!-- Product Title -->
         <div class="container mb-4" style="font-size:1.25em">
-            <div class="row">
-                <div class="col-11">{{ item.name }}</div>
-                <div class="col px-0">
-                    <button type="button" value="Delete" class="btn close" data-target="#deleteModal" data-toggle="modal">&times;</button>
-                </div>
+          <div class="row">
+            <div class="col-11">{{ product.name }}</div>
+            <div class="col px-0">
+              <button type="button" value="Delete" class="btn close" data-target="#deleteModal"
+                data-toggle="modal">&times;</button>
             </div>
+          </div>
         </div>
         <!-- Product Description -->
         <div class="container">
-            <div class="row align-items-end">
-                <!-- <div>
-                    {{ item.url }}
-                </div> -->
-                <div class="col">
-                    <img class="p-0 img-thumbnail ml-auto float-left" src="{{ image_file }}" alt="Product image" style="width:50%">
-                </div>
-                <div class="col">
-                    <p class="mb-0 float-right">Current Price: $499.99</p>
-                </div> 
+          <div class="row align-items-end">
+            <!-- <div>
+              {{ product.url }}
+            </div> -->
+            <div class="col-5 m-0">
+              <img class="p-0 img-thumbnail ml-auto float-left" src="{{ image_file }}" alt="Product image"
+                style="width:75%">
             </div>
+            <div class="col-7 m-0">
+              <form action="{{ url_for('tracked', product_id=product.id) }}" method="post">
+                <div class="row align-items-end">
+                  <div class="form-group col-7">
+                    {{ form.price_cutoff.label(class="form-label") }}
+                    {{ form.price_cutoff(class="form-control") }}
+                  </div>
+                  <div class="form-group col-5">
+                    {{ form.submit(class="btn btn-outline-dark form-control p-0", style="font-size:1em") }}
+                  </div>
+              </form>
+            </div>
+          </div>
         </div>
-    </li>
-    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        </div>
+      </li>
+      <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -44,13 +57,14 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
-              <form action="{{ url_for('stop_tracking', item_id=item.id) }}" method="post">
+              <form action="{{ url_for('stop_tracking', product_id=product.id) }}" method="post">
                 <input class="btn btn-danger" type="submit" value="Delete">
               </form>
             </div>
           </div>
         </div>
-    </div>
+      </div>
     {% endfor %}
+  {% endif %}
 </ul>
 {% endblock %}
