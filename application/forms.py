@@ -1,50 +1,70 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DecimalField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, URL, NumberRange, ValidationError
-import re
+from urllib.parse import urlparse
 from application.models import User
-from application import bcrypt
+import re
 
-def special_characters(form, field): 
+
+def is_amazon_domain(form, field):
+    url = field.data
+    domain = urlparse(url).netloc
+    if 'amazon' not in domain:
+        raise ValidationError('Please enter an Amazon URL.')
+
+
+def has_special_characters(form, field):
     characters_regex = re.compile(r'^[a-zA-Z0-9\-_.]+$')
     mo = characters_regex.search(field.data)
-    if not mo:
+    if mo is None:
         raise ValidationError('Valid characters are A-Z a-z 0-9 . _ -')
 
-def unique_username(form, field):
+
+def is_unique_username(form, field):
     if User.query.filter_by(username=field.data).first():
         raise ValidationError('Username has already been taken.')
 
 
-def unique_email(form, field):
+def is_unique_email(form, field):
     if User.query.filter_by(email=field.data).first():
         raise ValidationError('Email has already been taken.')
-    
+
 
 class ProductInfoForm(FlaskForm):
-    url = StringField('URL', validators=[DataRequired(), URL()])
-    price_cutoff = DecimalField('Price Cutoff', places=2, validators=[DataRequired(), NumberRange(min=0)])
+    url = StringField('URL', validators=[DataRequired(),
+                                         URL(),
+                                         is_amazon_domain])
+    price_cutoff = DecimalField('Price Cutoff', places=2, validators=[DataRequired(),
+                                                                      NumberRange(min=0)])
     submit = SubmitField('Track Item')
 
 
+class NewPriceCutoffForm(FlaskForm):
+    price_cutoff = DecimalField('Price Cutoff', places=2, validators=[DataRequired(),
+                                                                      NumberRange(min=0)])
+    submit = SubmitField('Submit Changes')
+
+
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=4, max=30), special_characters, unique_username])
-    email = StringField('Email', validators=[DataRequired(), Email(), unique_email])
-    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm_password', message='Passwords must match.')])
+    username = StringField('Username', validators=[DataRequired(),
+                                                   Length(min=4, max=30),
+                                                   has_special_characters,
+                                                   is_unique_username])
+
+    email = StringField('Email', validators=[DataRequired(),
+                                             Email(),
+                                             is_unique_email])
+
+    password = PasswordField('Password', validators=[DataRequired(),
+                                                     EqualTo('confirm_password',
+                                                             message='Passwords must match.')])
+
     confirm_password = PasswordField('Confirm Password')
     submit = SubmitField('Sign Up')
 
-    # def unique_username(self, username):
-    #     if User.query.filter_by(username=username.data).first():
-    #         raise ValidationError('Username has already been taken.')
-
-    # def unique_email(self, email):
-    #     if User.query.filter_by(email=email.data).first():
-    #         raise ValidationError('Email is already being used.')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember me')
     submit = SubmitField('Log In')
-
