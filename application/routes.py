@@ -57,9 +57,13 @@ def tracked(product_id):
 @app.route('/stop_tracking/<int:product_id>', methods=['GET', 'POST'])
 @login_required
 def stop_tracking(product_id):
-    product = Product.query.get(product_id)
-    association = UserProduct.query.filter_by(user=current_user, product=product).first()
+    # Check if product id exists or if product belongs to user
+    product = Product.query.get_or_404(product_id)
+    if UserProduct.query.filter_by(product=product).first().user != current_user:
+        abort(403)
+
     # Check if the product (whose id is a query string) is being tracked by the user
+    association = UserProduct.query.filter_by(user=current_user, product=product).first()
     if not association:
         return redirect(url_for('index'))
     else:
