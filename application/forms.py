@@ -6,11 +6,11 @@ from application.models import User
 import re
 
 
-def is_amazon_domain(form, field):
+def is_bestbuy_domain(form, field):
     url = field.data
     domain = urlparse(url).netloc
-    if 'amazon' not in domain:
-        raise ValidationError('Please enter an Amazon URL.')
+    if 'bestbuy' not in domain:
+        raise ValidationError('Please enter a Best Buy URL.')
 
 
 def has_special_characters(form, field):
@@ -33,7 +33,7 @@ def is_unique_email(form, field):
 class ProductInfoForm(FlaskForm):
     url = StringField('URL', validators=[DataRequired(),
                                          URL(),
-                                         is_amazon_domain])
+                                         is_bestbuy_domain])
     price_cutoff = DecimalField('Price Cutoff', places=2, validators=[DataRequired(),
                                                                       NumberRange(min=0)])
     submit = SubmitField('Track Item')
