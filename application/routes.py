@@ -1,8 +1,11 @@
 from application import app, db, bcrypt
-from application.models import User, Product, UserProduct
-from application.forms import ProductInfoForm, RegistrationForm, LoginForm, NewPriceCutoffForm
+from application.models import User, Product, UserPreferences, UserProduct
+from application.forms import AccountPreferencesForm, ProductInfoForm, RegistrationForm, LoginForm, NewPriceCutoffForm
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
+from application.helpers import *
+from application.bbwrapper.ProductInfo import ProductInfo
+from datetime import datetime
 
 
 @app.route('/', methods=['GET', 'POST'])
