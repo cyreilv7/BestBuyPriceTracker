@@ -43,7 +43,7 @@ class ProductInfoForm(FlaskForm):
 class NewPriceCutoffForm(FlaskForm):
     price_cutoff = DecimalField('Price Cutoff', places=2, validators=[DataRequired(),
                                                                       NumberRange(min=0)])
-    submit = SubmitField('Submit Changes')
+    submit = SubmitField('Change')
 
 
 class RegistrationForm(FlaskForm):
@@ -69,3 +69,22 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember me')
     submit = SubmitField('Log In')
+
+
+class AccountPreferencesForm(FlaskForm):
+    # on click => disable all other forms
+    email = StringField('Email', validators=[Optional(), Email(), is_unique_email])
+
+    password = PasswordField('Password', validators=[Optional(), EqualTo('confirm_password',
+                                                             message='Passwords must match.')])
+
+    confirm_password = PasswordField('Confirm Password')
+
+    disable_notifications = BooleanField('Disable all email notifications')
+
+    receive_reminders = BooleanField('Send me email reminders', default="checked")
+
+    reminder_frequency = IntegerField(validators=[Optional(), DataRequired(), NumberRange(min=1, max=24, message="Must enter a value between 1 and 24 hours.")]) #enabled only if parent is checked => DataRequired()
+
+    submit = SubmitField('Submit Changes')
+
