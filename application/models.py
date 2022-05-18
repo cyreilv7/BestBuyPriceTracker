@@ -1,6 +1,8 @@
 from application import db, login_manager
 from sqlalchemy.ext.associationproxy import association_proxy
+from datetime import datetime
 from flask_login import UserMixin
+
 
 @login_manager.user_loader
 def user_loader(user_id):
@@ -8,36 +10,54 @@ def user_loader(user_id):
 
 
 class UserProduct(db.Model):
-    user_id = db.Column(db.ForeignKey('user.id'), primary_key=True)
-    product_id = db.Column(db.ForeignKey('product.id'), primary_key=True)
-    price_cutoff = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.ForeignKey('user.id'))
+    product_id = db.Column(db.ForeignKey('product.id'))
+    price_cutoff = db.Column(db.Numeric(10, 2, 2), nullable=False)
+    last_updated = db.Column(
+        db.DateTime, nullable=False)
+    next_notification = db.Column(db.String(20), server_default="primary")
     user = db.relationship('User', backref='products')
     product = db.relationship('Product', backref='users')
 
 
-class User(db.Model, UserMixin):    
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-    # products = db.relationship('Association', back_populates='user', lazy='dynamic')
+    user_preferences = db.relationship(
+        'UserPreferences', backref="user", uselist=False)
 
     def __repr__(self):
         return self.username
 
 
+class UserPreferences(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    all_notifications_disabled = db.Column(
+        db.Boolean, default=False, nullable=False)
+    reminders_disabled = db.Column(
+        db.Boolean, default=False, nullable=True)
+    reminder_freq = db.Column(db.Integer, default=6, nullable=False)
+    
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    sku = db.Column(db.String(10), unique=True, nullable=False)
     name = db.Column(db.String(20), nullable=False)
-    price = db.Column(db.Float, nullable=False)
+    price = db.Column(db.String(20), nullable=False)
     url = db.Column(db.String(500), unique=True, nullable=False)
-    image_file = db.Column(db.String(20), nullable=False, server_default='unavailable.png')
-    # users = db.relationship('Association', back_populates='product', lazy='dynamic')
+    is_available = db.Column(db.Boolean)
+    image_file = db.Column(db.String(20), nullable=False,
+                           server_default='unavailable.png')
+
 
 # dummy data for command line testing
 def dummy_data():
-    u = User(username='test', email='test', password='test')  
-    p = Product(name='product', price=20.2, url='https://www.amazon.com/')
+    u = User(username='testuser', email='testemail', password='testpassword')
+    p = Product(name='product', price=20.2, url='https://www.example.com/')
     a = UserProduct(price_cutoff=15)
     a.product = p
     u.products.append(a)
@@ -51,6 +71,7 @@ def dummy_data():
 
 
 # For use on command line for setting up the database.
+# root directory -> from application.models import init_db()
 def init_db():
     db.drop_all()
     db.create_all()
