@@ -1,0 +1,47 @@
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.product-image-container {
+    width: 150px;
+    max-height: 110px;
+}
+
+.product-image-container img {
+    display: block;
+    width: 100%;
+    max-height: 100%;
+    object-fit: scale-down;
+}
+
+
+
+/* .price-cutoff-input {
+    display: inline;
+} */
+
+.price-cutoff-btn {
+    font-size:.8em; 
+    width: 75px; 
+    display: inline;
+}
+
+.price-cutoff-label {
+    display: inline-block;
+}
+
+/* .product-name {
+    align-self: center;
+} */
+
+#reminder_frequency {
+    display: inline-block;
+    margin: 0 .25em;
+    appearance: none;
+    max-height: 30px;
+    max-width: 70px;
+}
+
+.account-info input {
+    height: 2.2em;
+}
