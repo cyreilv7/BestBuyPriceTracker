@@ -1,48 +1,58 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<style>
+  body {
+    min-height: 1000px;
+  }
+</style>
 
-<div class="border-bottom mb-4" style="font-size:1.75em">Items Currently Being Tracked</div>
-<ul class="list-group">
-  {% if not products %}
-    <p>You're currently not tracking any items.</p>
-  {% else %}
-    {% for product, image_file in product_attributes %}
+<div class="border-bottom" style="font-size:1.75em">Items Currently Being Tracked</div>
+{% if not products %}
+  <p class="mt-2">You're currently not tracking any items.</p>
+{% else %}
+<form method="POST" action="{{ url_for('tracked') }}" id="price-cutoff-form">
+<ul class="list-group mt-4">
+    {% for product, image_file, association, time_elapsed in product_attributes %}
       <li class="list-group-item">
         <!-- Product Title -->
-        <div class="container mb-4" style="font-size:1.25em">
-          <div class="row">
-            <div class="col-11">{{ product.name }}</div>
-            <div class="col px-0">
-              <button type="button" value="Delete" class="btn close" data-target="#deleteModal"
-                data-toggle="modal">&times;</button>
-            </div>
-          </div>
-        </div>
+        
         <!-- Product Description -->
-        <div class="container">
-          <div class="row align-items-end">
-            <!-- <div>
-              {{ product.url }}
-            </div> -->
-            <div class="col-5 m-0">
-              <img class="p-0 img-thumbnail ml-auto float-left" src="{{ image_file }}" alt="Product image"
-                style="width:75%">
+        <!-- Container -->
+        <div class="tracked-products container">
+          <!-- Main row -->
+          <div class="product-name-img mt-3 row">
+            <!-- Column 1 - Product image -->
+            <div class="product-image-container col-4 m-0 p-0">
+              <img class="p-0 ml-auto float-left" src="{{ image_file }}" alt="Product image">
             </div>
-            <div class="col-7 m-0">
-              <form action="{{ url_for('tracked', product_id=product.id) }}" method="post">
-                <div class="row align-items-end">
-                  <div class="form-group col-7">
-                    {{ form.price_cutoff.label(class="form-label") }}
-                    {{ form.price_cutoff(class="form-control") }}
-                  </div>
-                  <div class="form-group col-5">
-                    {{ form.submit(class="btn btn-outline-dark form-control p-0", style="font-size:1em") }}
-                  </div>
-              </form>
+            <!-- <div class="container mb-4" > -->
+            <div class="col-7" style="font-size:1.25em"><a href="{{ product.url }}">{{ product.name }}</a></div>
+            <!-- Delete button -->
+            <div class="col-1 px-0">
+              <button type="button" value="Delete" class="btn close" data-target="#deleteModal"
+              data-toggle="modal">&times;
+              </button>
+            </div>
+            <!-- </div> -->
+          </div>
+          <!-- Product info row -->
+          <div class="row align-items-end mt-4 ml-2">
+            <div class="col-4 m-0">
+              <div class="row">Current Price: ${{ product.price }}</div>
+              <div class="row"><small>Last updated: {{ time_elapsed }} ago</small></div>
+            </div>
+            <div class="col-5 m-0">
+              <div class="ml-2 input-group align-items-center">
+                <span class="mr-2">Price Cutoff</span>
+                <div class="input-group-prepend">
+                    <span class="input-group-text">$</span>
+                </div>
+                <input class="price-cutoff-input form-control" type="number" step="any" in="0" name="price-cutoff" value="{{ association.price_cutoff }}">
+              </div>
             </div>
           </div>
-        </div>
+
         </div>
       </li>
       <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
@@ -57,14 +67,44 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
-              <form action="{{ url_for('stop_tracking', product_id=product.id) }}" method="post">
-                <input class="btn btn-danger" type="submit" value="Delete">
+              <form action="{{ url_for('stop_tracking') }}" method="POST" id="stop-tracking">
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                <input  class="btn btn-danger" value="Delete" form="stop-tracking">
               </form>
             </div>
           </div>
         </div>
       </div>
     {% endfor %}
+  </form>
+
+    <div class="modal fade" id="deleteAllModal" tabindex="-1" role="dialog" aria-labelledby="deleteAllModalLabel"
+    aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteAllModalLabel">Are you sure you want to stop tracking ALL products?</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+            <form action="{{ url_for('stop_tracking_all') }}" method="POST">
+              <input class="btn btn-danger" type="submit" value="Delete All">
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ul>
+
+  <div class="container my-3">
+    <div class="row float-right">
+      <input type="submit" class="btn btn-success mr-2" value="Submit Changes" form="price-cutoff-form">
+      <input type="button" class="btn btn-danger" value="Delete All" data-target="#deleteAllModal" data-toggle="modal"></input>
+    </div>
+  </div>
   {% endif %}
-</ul>
+    
 {% endblock %}
