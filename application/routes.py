@@ -14,63 +14,116 @@ from datetime import datetime
 def index():
     form = ProductInfoForm()
     if form.validate_on_submit():
-        product = Product.query.filter_by(url=form.url.data).first()
-        association = UserProduct.query.filter_by(
+        # Check for existing association between user and product
+        product = Product.query.filter_by(url=form.url.data).first() # TODO: filter by sku might be more reliable
+        asso = UserProduct.query.filter_by(
             user=current_user, product=product).first()
         if product:
-            if association: 
+            if asso:
                 flash('You are already tracking this item.', 'danger')
                 return render_template('index.html', form=form)
-        # TODO: Attempt to scrape product info. If fail, flash "There was an error tracking this product."
         else:
-            product = Product(name='TestName', price=10.2, url=form.url.data)
+            # Get product info from BestBuy API
+            product_object = ProductInfo(url=form.url.data)
+            product_object.set_primary_info()
+            product_object.save_product_image()
+
+            product = Product(
+                sku=product_object.sku,
+                name=product_object.name,
+                price=product_object.price,
+                is_available=product_object.is_available,
+                url=form.url.data,
+                image_file=product_object.image_filename,
+            )
             db.session.add(product)
-        a = UserProduct(price_cutoff=int(form.price_cutoff.data))
-        a.product = product
+        
+        new_asso = UserProduct(last_updated=datetime.now(), price_cutoff=round(
+            float(form.price_cutoff.data), 2))
+        new_asso.product = product
         with db.session.no_autoflush:
             # current_user.products.append(a)
-            a.user = current_user
-        db.session.add(a)
+            new_asso.user = current_user
+        db.session.add(new_asso)
         db.session.commit()
         flash('Item is succesfully being tracked!', 'success')
     return render_template('index.html', form=form)
 
-@app.route('/tracked', defaults={'product_id': None}, methods=['GET', 'POST'])
-@app.route('/tracked/<int:product_id>', methods=['GET', 'POST'])
+
+@app.route('/tracked', methods=['GET', 'POST'])
 @login_required
-def tracked(product_id):
-    form = NewPriceCutoffForm()
-    # Fetch all products tracked by the user
+def tracked():
+    # Get list of product objects
     products = db.session.query(Product). \
         join(UserProduct). \
         filter(UserProduct.user_id == current_user.id).all()
-    # Create list of file paths to each product's image
-    product_image_files = [
-        url_for('static', filename=f'product_images/{f.image_file}') for f in products]
-    product_attributes = zip(products, product_image_files)
-    if form.validate_on_submit():
-        product = Product.query.get(product_id)
-        association = UserProduct.query.filter_by(user=current_user, product=product).first()
-        association.price_cutoff = int(form.price_cutoff.data)
+
+    # List of association objects between user and product
+    associations = UserProduct.query.filter_by(user=current_user).all()
+
+    # List of file paths to each product's image
+    product_image_files = [url_for('static',
+                                   filename=f'product_images/{product.image_file}') for product in products]
+
+    last_updated = []
+    now = datetime.now()
+    for product in associations:
+        str = ""
+        hours_elapsed = get_hours_elapsed(product.last_updated, now)
+        if hours_elapsed >= 1:
+            if (hours_elapsed == 1):
+                str = f"{hours_elapsed} hour"
+            else:
+                str = f"{hours_elapsed} hours"
+        else:
+            mins_elapsed = get_mins_elapsed(product.last_updated, now)
+            if mins_elapsed == 1:
+                str = f"{mins_elapsed} minute"
+            else:
+                str = f"{mins_elapsed} minutes"
+        last_updated.append(str)
+
+    product_attributes = zip(
+        products, product_image_files, associations, last_updated)
+
+    if request.method == 'POST':
+        price_cutoffs = request.form.getlist('price-cutoff')
+        print(price_cutoffs)
+        for asso, price_cutoff in zip(associations, price_cutoffs):
+            # asso = UserProduct.query.filter_by(user=current_user,
+            #                                 product=product).first()
+            asso.price_cutoff = round(float(price_cutoff), 2)
         db.session.commit()
-        flash('Price cutoff succesfully updated.', 'success')
-    return render_template('tracked.html', products=products, product_attributes=product_attributes, form=form)
+        flash('Price cutoffs successfully updated.', 'success')
+    return render_template('tracked.html', products=products,
+                           product_attributes=product_attributes)
 
 
-@app.route('/stop_tracking/<int:product_id>', methods=['GET', 'POST'])
+@app.route('/stop_tracking', methods=['GET', 'POST'])
 @login_required
-def stop_tracking(product_id):
-    # Check if product id exists or if product belongs to user
-    product = Product.query.get_or_404(product_id)
-    if UserProduct.query.filter_by(product=product).first().user != current_user:
-        abort(403)
+def stop_tracking():
+    if request.method == 'POST':
+        product_id = int(request.form.get("product_id"))
+        product = Product.query.get(product_id)
 
-    # Check if the product (whose id is a query string) is being tracked by the user
-    association = UserProduct.query.filter_by(user=current_user, product=product).first()
-    if not association:
-        return redirect(url_for('index'))
-    else:
-        db.session.delete(association)
+        asso = UserProduct.query.filter_by(
+            user=current_user, product=product).first()
+        if not asso:
+            return redirect(url_for('index'))
+        else:
+            db.session.delete(asso)
+            db.session.commit()
+
+    return redirect(url_for('tracked'))
+
+
+@app.route('/stop_tracking_all', methods=['GET', 'POST'])
+@login_required
+def stop_tracking_all():
+    if request.method == 'POST':
+        associations = UserProduct.query.filter_by(user=current_user).all()
+        for asso in associations:
+            db.session.delete(asso)
         db.session.commit()
     return redirect(url_for('tracked'))
 
