@@ -134,13 +134,15 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     if form.validate_on_submit():
-        # Insert user account info into the database
         username = form.username.data
         email = form.email.data
         hashed_password = bcrypt.generate_password_hash(
             form.password.data).decode('utf-8')
         user = User(username=username, email=email, password=hashed_password)
+        user_prefs = UserPreferences()
+        user_prefs.user = user
         db.session.add(user)
+        db.session.add(user_prefs)
         db.session.commit()
         flash('You are now able to login.', 'success')
         return redirect(url_for('login'))
@@ -154,10 +156,8 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        # Check if username matches password
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
+        if user and bcrypt.check_password_hash(user.password, form.password.data): # Check if username matches password
             login_user(user, remember=form.remember_me.data)
-            # Parse the query string and go to that route
             next_page = request.args.get('next')
             if next_page:
                 flash('Login was successful!', 'success')
@@ -165,7 +165,6 @@ def login():
             else:
                 flash('Login was successful!', 'success')
                 return redirect(url_for('index'))
-
         else:
             flash('Login unsuccessful. Please check username or password.', 'danger')
     return render_template('login.html', title='Login', form=form)
