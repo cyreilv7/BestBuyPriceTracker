@@ -2,16 +2,12 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
-.product-image-container {
-    width: 150px;
-    max-height: 110px;
-}
 
 .product-image-container img {
     display: block;
-    width: 100%;
-    max-height: 100%;
     object-fit: scale-down;
+    width: 100%;
+    max-height: 120px;
 }
 
 
@@ -43,5 +39,5 @@ input[type=number] {
 }
 
 .account-info input {
-    height: 2.2em;
+    height: 2.1em;
 }
