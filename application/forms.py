@@ -1,16 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DecimalField, IntegerField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, URL, NumberRange, ValidationError
-from urllib.parse import urlparse
+from wtforms.validators import DataRequired, Length, Email, EqualTo, URL, NumberRange, ValidationError, Optional
 from application.models import User
 import re
 
 
 def is_bestbuy_domain(form, field):
     url = field.data
-    domain = urlparse(url).netloc
-    if 'bestbuy' not in domain:
-        raise ValidationError('Please enter a Best Buy URL.')
+    valid_domain_regex = re.compile(
+        r'(bestbuy.com).+(skuId=)(\d{7})', re.IGNORECASE)
+    mo = valid_domain_regex.search(url)
+    if not mo:
+        raise ValidationError('Please enter a valid BestBuy URL.')
 
 
 def has_special_characters(form, field):
