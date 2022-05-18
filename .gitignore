@@ -4,3 +4,4 @@ scratch.py
 site.sqlite
 migrations
 data
+.env
