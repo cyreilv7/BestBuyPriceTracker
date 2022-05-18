@@ -120,3 +120,37 @@ def logout():
     logout_user()
     flash("You've been logged out successfully!", 'success')
     return redirect(url_for('index'))
+
+
+@app.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
+    user = User.query.filter_by(id=current_user.id).first()
+    user_prefs = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    form = AccountPreferencesForm()
+    if form.validate_on_submit():
+        if not form.disable_notifications.data:
+            user_prefs.all_notifications_disabled = False
+        else:
+            user_prefs.all_notifications_disabled = True
+        if not form.receive_reminders.data:
+            user_prefs.reminders_disabled = True
+        else:
+            user_prefs.reminders_disabled = False
+            user_prefs.reminder_freq = form.reminder_frequency.data
+        
+        if form.email.data != "":
+            user.email = form.email.data
+        if form.password.data != "":
+            user.password = form.password.data
+        db.session.commit()
+        flash("Your account settings have been updated.", 'success')
+    
+    return render_template('account.html', title='Account', form=form, user=user, user_prefs=user_prefs)
+
+@app.teardown_request
+def teardown_request(exception):
+    if exception:
+        db.session.rollback()
+    db.session.remove()
+
