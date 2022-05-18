@@ -8,6 +8,7 @@ let input = document.querySelector('.reminder-freq');
 reminder.addEventListener("click", (e) => {
     if (e.target.checked) {
         input.disabled = false;
+        input.value = 6;
     } else { 
         input.disabled = true;
         input.value = "";
