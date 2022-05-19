@@ -12,10 +12,19 @@ def create_product(db_product):
     return product_object
 
 
+def update_db(db_product, product):
+    db_product.sku=product.sku
+    db_product.name=product.name
+    db_product.price=product.price
+    db_product.is_available=product.is_available
+    db_product.url=product.url.data
+    db_product.image_file=product.image_filename
+    db.session.commit()
+
+
 def update_product_info():
     print("hello")
     pass
-    all_users = User.query.all()
     results = db.session.query(User, UserPreferences) \
         .join(UserPreferences) \
         .filter(UserPreferences.all_notifications_disabled == False) \
@@ -30,16 +39,14 @@ def update_product_info():
         # UserProduct object
         assos_primary = [asso for asso in associations if asso.next_notification == "primary"]
         for asso in assos_primary:
-            # seems a bit expensive.. not sure if I want to do this everytime
             product = create_product(asso.product)
             if float(product.price) <= asso.price_cutoff:
-                # create list of assos which has info about user & on-sale product
-                primary_emails.append(asso)
+                primary_emails.append(asso)                 # create list of assos which has info about user & on-sale product
                 asso.next_notification = "reminder"
+            update_db(asso.product, product)
             sleep(3)  # prevent api timeouts
 
         if reminders_on:
-            # UserProduct object
             assos_reminder = [asso for asso in associations if asso.next_notification == "reminder"]
             for asso in assos_reminder:
                 product = create_product(asso.product)
@@ -49,8 +56,8 @@ def update_product_info():
                     reminder_emails.append(asso)
                     # can set notif_type back to primary if you decide better UX = only send reminder once
                 else:
-                    # stop sending reminders once price goes back up
-                    asso.next_notification = "primary"
+                    asso.next_notification = "primary" # stop sending reminders once price goes back up
+                update_db(asso.product, product)
                 sleep(3)
 
         send_emails(primary_emails, reminder_emails)
