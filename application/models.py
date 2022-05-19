@@ -39,7 +39,7 @@ class UserPreferences(db.Model, UserMixin):
     all_notifications_disabled = db.Column(
         db.Boolean, default=False, nullable=False)
     reminders_disabled = db.Column(
-        db.Boolean, default=False, nullable=True)
+        db.Boolean, default=True, nullable=True)
     reminder_freq = db.Column(db.Integer, default=6, nullable=False)
     
 
