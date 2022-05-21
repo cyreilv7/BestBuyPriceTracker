@@ -1,28 +1,25 @@
 # BestBuyPriceTracker
 
 ## Description
-A full stack web app to track the price of any Best Buy product and send email notifications of price updates. 
+A web app where users can track Best Buy products and receive an email when there’s a price drop. Product information is updated every 5 minutes with scheduled requests to BestBuy's API
 
 ## Build status 
 Status: Not yet live </br>
 Started on: Dec 3 2021 </br>
-Last modified: February 28 2022
+Last modified: May 19th 2022
 
 ## Tech/frameworks 
 * Flask
 * SQLAlchemy
 * Bootstrap
-* REST API
 
 ## Features
-* Create an account 
-* Track BestBuy prices via webscraping
-* Email updates of price changes
+* Login/register
+* Create/edit list of tracked BestBuy products with up-to-date product info (e.g., prices and images)
+* Receive email alerts for price drops
+* Adjust reminder frequency or disable all emails
 
 ## Future Updates
-* Product queries to BestBuy Product API
 * Price history graphs
-* Add password reset and email confirmation 
-* Make pages more dynamic with front-end frameworks such as React
-* Customize email preferences (e.g., frequency, types of emails)
-
+* Add password reset and email confirmation
+* More dynamic webpages with a front-end framework
