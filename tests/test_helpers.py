@@ -5,31 +5,28 @@ from application.helpers import update_product_info
 from application.models import User, Product, UserPreferences, UserProduct
 
 """
-1. Create fake db product with different price and high price cutoff with a real sku
-2. Run helper function
-3. Query product with same sku
-4. See if product price was updated in db
-5. Check if email list was populated
+1. Update existing product's price to FAKE_HIGH_PRICE
+2. Run update function
+3. Check that actual price FAKE_HIGH_PRICE
 """
 
-TEST_SKU = "6487447"
-TEST_URL = "https://www.bestbuy.com/site/apple-iphone-13-pro-max-5g-128gb-alpine-green-t-mobile/6487447.p?skuId=6487447#anchor=productVariations"
-test_product = ProductInfo(sku=TEST_SKU)
-actual_price = test_product.price
+FAKE_HIGH_PRICE = 100000
 
-pytest.fixture()
-def create_product():
-    product = Product(
-        sku=test_product.sku,
-        name=test_product.name,
-        price=10000, # artificial price
-        is_available=test_product.is_available,
-        url=test_product.url,
-        image_file=test_product.image_filename
-    )
-    db.commit()
+@pytest.fixture
+def update_price():
+    def _update_price(product):
+        product.price = FAKE_HIGH_PRICE
+        db.session.commit()
+    return _update_price
 
-def test_update(create_product):
+def test_update(update_price):
+    user = UserPreferences.query.filter_by(all_notifications_disabled=False).first().user
+    test_product = UserProduct.query.filter_by(user_id=user.id).first().product
+    update_price(test_product)
     update_product_info()
-    product = Product.query.filter_by(sku=TEST_SKU).first()
-    assert(product.price == actual_price)
+    assert (int(test_product.price) < FAKE_HIGH_PRICE)
+
+# test if product is NOT being updated per user's account settings
+@pytest.mark.skip(reason="for later")
+def test_account_preferences():
+    pass
