@@ -22,5 +22,5 @@ migrate = Migrate(app, db, compare_type=True)
 
 from application import routes
 from application.helpers import update_product_info
-# scheduler.add_job(update_product_info,'interval', seconds=5)
-# scheduler.start()
+scheduler.add_job(update_product_info,'interval', seconds=15)
+scheduler.start()
