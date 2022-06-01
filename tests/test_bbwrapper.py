@@ -23,7 +23,7 @@ def test_primary_info(product_attributes):
     # test setters
     test_product.set_primary_info()
     assert set(test_product.__dict__.keys()).issubset(product_attributes)
-    
+
 
 def test_get_product_sku():
     valid_url = TEST_URL
@@ -31,11 +31,12 @@ def test_get_product_sku():
 
     assert (test_product.get_product_sku(valid_url) == TEST_SKU)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as context:
         test_product.get_product_sku(invalid_url)
+    assert str(context.value) == "Could not find the product SKU in the provided URL." 
 
 
-def test_save_img():
+def test_save_product_img():
     test_product.save_product_image()
     script_dir = os.path.dirname(os.path.realpath('__file__'))
     parent_folder = os.path.join(script_dir, "application/static/product_images")
