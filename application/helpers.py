@@ -3,7 +3,9 @@ from application.models import User, Product, UserPreferences, UserProduct
 from application import db
 from application.bbwrapper import ProductInfo
 from time import sleep
-
+from dotenv import load_dotenv
+import smtplib
+import os
 
 def create_product_info(db_product):
     product_object = ProductInfo(sku=db_product.sku)
@@ -28,7 +30,7 @@ def update_product_info():
         .filter(UserPreferences.all_notifications_disabled == False) \
         .all()
     subscribed_users = [d[0] for d in results]
-    primary_emails = reminder_emails = []
+    primary_email_list = reminder_email_list = []
     now = datetime.now()
 
     for user in subscribed_users:
@@ -40,31 +42,51 @@ def update_product_info():
         for asso in assos_primary:
             product_info = create_product_info(asso.product)
             if float(product_info.price) <= asso.price_cutoff:
-                primary_emails.append(asso)                 # create list of assos which has info about user & on-sale product
+                primary_email_list.append(asso)                 # create list of assos which has info about user & on-sale product
                 asso.next_notification = "reminder"
-            update_db(asso.product, product_info)
-            # sleep(3)  # prevent api timeouts
+            update_db(asso.product, asso, now, product_info)
+            sleep(3)  # prevent api rate limit 
 
-        if reminders_on:
-            assos_reminder = [asso for asso in associations if asso.next_notification == "reminder"]
-            for asso in assos_reminder:
-                product_info = create_product_info(asso.product)
-                hours = get_hours_elapsed(asso.last_updated, now)
-                reminder_freq = user.user_preferences.reminder_freq
-                if hours >= reminder_freq and float(product_info.price) <= asso.price_cutoff:
-                    reminder_emails.append(asso)
-                    # can set notif_type back to primary if you decide better UX = only send reminder once
-                else:
-                    asso.next_notification = "primary" # stop sending reminders once price goes back up
-                update_db(asso.product, product_info)
-                # sleep(3)
+        assos_reminder = [asso for asso in associations if asso.next_notification == "reminder"]
+        for asso in assos_reminder:
+            hours = get_hours_elapsed(asso.last_updated, now)
+            product_info = create_product_info(asso.product)
+            if hours >= (7*24):
+                asso.next_notification = "primary"
+                db.session.commit()
+            elif reminders_on and hours >= reminder_freq and float(product_info.price) <= asso.price_cutoff:
+                reminder_email_list.append(asso)
 
-        send_emails(primary_emails, reminder_emails)
-        print(primary_emails)
+            update_db(asso.product, asso, now, product_info)
+            sleep(3)
+    
+        send_emails(primary_email_list, reminder_email_list)
 
 
-def send_emails(primary_emails=None, reminder_emails=None):
-    pass
+def send_emails(primary_email_list=None, reminder_email_list=None):
+    load_dotenv()
+    EMAIL_ADDRESS = os.environ['EMAIL_ADDRESS']
+    EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
+
+    with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+        smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+
+        if primary_email_list:
+            for asso in primary_email_list:
+                subject = f'Price Drop Alert - {asso.product.name[:30]} is on sale'
+                body = f'{asso.product.name} has dropped below ${asso.price_cutoff}!\n\nGet it for ${asso.product.price} at {asso.product.url}.'
+                msg = f'Subject: {subject}\n\n{body}'
+                smtp.sendmail(EMAIL_ADDRESS, asso.user.email, msg)
+
+        if reminder_email_list:
+            for asso in reminder_email_list:
+                subject = f'{asso.product.name} is still on sale!'
+                body = f'{asso.product.name} is still under ${asso.price_cutoff}. Get it at {asso.product.url} before the deal expires!'
+                msg = f'Subject: {subject}\n\n{body}'
+                smtp.sendmail(EMAIL_ADDRESS, asso.user.email, msg)
 
 
 def get_hours_elapsed(last_updated, now):
