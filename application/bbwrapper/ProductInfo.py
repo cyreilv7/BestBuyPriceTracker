@@ -11,17 +11,15 @@ class ProductInfo:
         if sku is None and url is None:
             raise ValueError(
                 "Must provide either a product url or product sku")
-        if sku is None and url is not None:
+        elif sku is None and url is not None:
             self.sku = self.get_product_sku(url)
         else:
             self.url = url
             self.sku = sku
         # self.name = None
-        # self.total_price= None
         # self.price = None
-        # self.shipping = None
         # self.is_available = None
-        # self.image_filename = None
+        # self.image_url = None
 
     def get_product_sku(self, url):
         domain_regex = re.compile(r'skuId=(\d{7})', re.IGNORECASE)
@@ -33,11 +31,11 @@ class ProductInfo:
                 "Could not find the product SKU in the provided URL.")
 
     def set_primary_info(self):
-        path = f"https://api.bestbuy.com/v1/products(sku={self.sku})?sort=salePrice.asc&show=salePrice,onlineAvailability,name,image&format=json"
-        res = session.get(path)
-        if (res.status_code == requests.codes.ok):
-            self.price, self.is_available, self.name, self.image_url = res.json()["products"][0].values()
-        else:
+        path = f"https://api.bestbuy.com/v1/products(sku={self.sku})?sort=salePrice.asc&show=salePrice,onlineAvailability,name,image,url&format=json"
+        try:
+            res = session.get(path)
+            self.price, self.is_available, self.name, self.image_url, self.page_url = res.json()["products"][0].values()
+        except:
             raise requests.RequestException(res.status_code)
 
     def save_product_image(self):
