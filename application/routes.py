@@ -15,7 +15,8 @@ def index():
     form = ProductInfoForm()
     if form.validate_on_submit():
         # Check for existing association between user and product
-        product = Product.query.filter_by(url=form.url.data).first() # TODO: filter by sku might be more reliable
+        sku = get_sku_from_url(form.url.data)
+        product = Product.query.filter_by(sku=sku).first() # TODO: filter by sku might be more reliable
         asso = UserProduct.query.filter_by(
             user=current_user, product=product).first()
         if product:
@@ -88,7 +89,6 @@ def tracked():
 
     if request.method == 'POST':
         price_cutoffs = request.form.getlist('price-cutoff')
-        print(price_cutoffs)
         for asso, price_cutoff in zip(associations, price_cutoffs):
             # asso = UserProduct.query.filter_by(user=current_user,
             #                                 product=product).first()

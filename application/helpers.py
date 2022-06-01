@@ -5,7 +5,14 @@ from application.bbwrapper import ProductInfo
 from time import sleep
 from dotenv import load_dotenv
 import smtplib
+import re
 import os
+
+def get_sku_from_url(url):
+    domain_regex = re.compile(r'skuId=(\d{7})', re.IGNORECASE)
+    mo = domain_regex.search(url)
+    if mo:
+        return mo.groups()[0]
 
 def create_product_info(db_product):
     product_object = ProductInfo(sku=db_product.sku)
@@ -35,15 +42,13 @@ def update_product_info():
     now = datetime.now()
 
     for user in subscribed_users:
-        # breakpoint()
         reminders_on = not user.user_preferences.reminders_disabled
         associations = UserProduct.query.filter_by(user=user).all()
-        # UserProduct object
         assos_primary = [asso for asso in associations if asso.next_notification == "primary"]
         for asso in assos_primary:
             product_info = create_product_info(asso.product)
             if float(product_info.price) <= asso.price_cutoff:
-                primary_email_list.append(asso)                 # create list of assos which has info about user & on-sale product
+                primary_email_list.append(asso) # create list of assos which has info about user & on-sale product
                 asso.next_notification = "reminder"
             update_db(asso.product, asso, now, product_info)
             sleep(3)  # prevent api rate limit 
@@ -53,7 +58,7 @@ def update_product_info():
             hours = get_hours_elapsed(asso.last_updated, now)
             product_info = create_product_info(asso.product)
             reminder_freq = user.user_preferences.reminder_freq
-            if hours >= (7*24):
+            if hours >= (7*24): # change to notif type to primary if it's been a week
                 asso.next_notification = "primary"
                 db.session.commit()
             elif reminders_on and hours >= reminder_freq and float(product_info.price) <= asso.price_cutoff:
