@@ -14,13 +14,14 @@ def create_product_info(db_product):
     return product_object
 
 
-def update_db(db_product, product):
+def update_db(db_product, asso, now, product):
     db_product.sku=product.sku
     db_product.name=product.name
     db_product.price=product.price
     db_product.is_available=product.is_available
     db_product.url=product.page_url
     db_product.image_file=product.image_filename
+    asso.last_updated = now
     db.session.commit()
 
 
