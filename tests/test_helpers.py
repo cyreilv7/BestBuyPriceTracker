@@ -20,11 +20,12 @@ def update_price():
     return _update_price
 
 def test_update(update_price):
-    user = UserPreferences.query.filter_by(all_notifications_disabled=False).first().user
-    test_product = UserProduct.query.filter_by(user_id=user.id).first().product
+    # breakpoint()
+    test_user = UserPreferences.query.filter_by(all_notifications_disabled=False).first().user
+    test_product = UserProduct.query.filter_by(user_id=test_user.id).first().product
     update_price(test_product)
     update_product_info()
-    assert (int(test_product.price) < FAKE_HIGH_PRICE)
+    assert (float(test_product.price) < FAKE_HIGH_PRICE)
 
 # test if product is NOT being updated per user's account settings
 @pytest.mark.skip(reason="for later")
