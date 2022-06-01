@@ -52,6 +52,7 @@ def update_product_info():
         for asso in assos_reminder:
             hours = get_hours_elapsed(asso.last_updated, now)
             product_info = create_product_info(asso.product)
+            reminder_freq = user.user_preferences.reminder_freq
             if hours >= (7*24):
                 asso.next_notification = "primary"
                 db.session.commit()
