@@ -16,7 +16,7 @@ Last modified: Jun 30 2022 </br>
 ### Tracking a product
 ![demo](https://user-images.githubusercontent.com/19630359/176833160-ab6172eb-906c-49a6-84c8-95bbb0bdb4c3.gif) </br></br>
 ### Updating product info
-![demo](https://user-images.githubusercontent.com/19630359/176834545-67531375-6be9-403f-ad5f-c7621fec2167.gif)
+![demo](https://user-images.githubusercontent.com/19630359/176836007-689c1a1b-37ef-4374-8d04-68918f046207.gif)
 
 ## Technologies/Frameworks 
 * Flask
