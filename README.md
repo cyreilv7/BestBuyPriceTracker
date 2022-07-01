@@ -1,7 +1,7 @@
 # Best Buy PriceTracker
 
 ## Description
-An online price tracking tool where users can track Best Buy products and receive real-time email notifications when the price drops.
+An online price tracking tool where users can follow Best Buy products and receive real-time email notifications when the price drops.
 
 Click here to use the app online: https://bestbuypricetracker.herokuapp.com/
 
