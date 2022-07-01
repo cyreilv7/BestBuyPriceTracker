@@ -4,9 +4,17 @@
 A web app where users can track Best Buy products and receive an email when there’s a price drop.
 
 ## Build status 
-Status: Not yet live </br>
+**Success**: [See Live](https://bestbuypricetracker.herokuapp.com/)
+</br></br>
 Started on: Dec 3 2021 </br>
-Last modified: May 28th 2022
+Completed on: Jan 30 2022 </br>
+Last modified: Jun 30 2022 </br>
+
+## Demo
+### Tracking a product
+![demo](https://user-images.githubusercontent.com/19630359/176833160-ab6172eb-906c-49a6-84c8-95bbb0bdb4c3.gif) </br></br>
+### Updating product info
+![demo](https://user-images.githubusercontent.com/19630359/176834545-67531375-6be9-403f-ad5f-c7621fec2167.gif)
 
 ## Tech/frameworks 
 * Flask
