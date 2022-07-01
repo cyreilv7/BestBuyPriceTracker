@@ -1,7 +1,9 @@
 # BestBuyPriceTracker
 
 ## Description
-A web app where users can track Best Buy products and receive an email when there’s a price drop.
+A web app where users can track Best Buy products and receive real-time email notifications when the price drops.
+
+Click here to use the app online: https://bestbuypricetracker.herokuapp.com/
 
 ## Build status 
 **Success**: [See Live](https://bestbuypricetracker.herokuapp.com/)
@@ -16,13 +18,13 @@ Last modified: Jun 30 2022 </br>
 ### Updating product info
 ![demo](https://user-images.githubusercontent.com/19630359/176834545-67531375-6be9-403f-ad5f-c7621fec2167.gif)
 
-## Tech/frameworks 
+## Technologies/Frameworks 
 * Flask
-* SQLAlchemy
+* SQLAlchemy/PostgreSQL
 * Bootstrap
 * REST API
 
-## Features
+## App Features
 * Create/edit list of tracked BestBuy products with up-to-date product info
 * Receive email alerts for price drops
 * Adjust price drop reminder frequency or disable all emails
@@ -30,6 +32,6 @@ Last modified: Jun 30 2022 </br>
 * Change username/password
 
 ## Future Updates
-* Price history graphs
-* Add password reset and email confirmation
-* More dynamic webpages with a front-end framework
+- [ ] Price history graphs
+- [ ] Add password reset and email confirmation
+- [ ] More dynamic webpages with a front-end framework
