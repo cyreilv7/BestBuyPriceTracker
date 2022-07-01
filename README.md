@@ -1,4 +1,4 @@
-# BestBuyPriceTracker
+# Best Buy PriceTracker
 
 ## Description
 A web app where users can track Best Buy products and receive real-time email notifications when the price drops.
