@@ -18,6 +18,12 @@ Last modified: Jun 30 2022 </br>
  </br>
 ### Updating product info
 ![demo](https://user-images.githubusercontent.com/19630359/176836007-689c1a1b-37ef-4374-8d04-68918f046207.gif)
+</br>
+### Email Notifications and Reminders
+
+![Screenshot 2022-07-02 at 23-12-39 Price Drop Alert - MacBook Air 13 3 Laptop - App is on sale - shoiiru3@gmail com - Gmail](https://user-images.githubusercontent.com/19630359/177027438-4bdb95ac-feb6-4aaa-ab57-f930080596e1.png)
+
+![Screenshot 2022-07-02 at 23-17-27 MacBook Air 13 3 Laptop - Apple M1 chip - 8GB Memory - 256GB SSD - Space Gray is still on sale! - shoiiru3@gmail com - Gmail](https://user-images.githubusercontent.com/19630359/177027529-6cfde6ef-6a6e-4f72-af47-06faa56e5f38.png)
 
 
 ## Technologies/Frameworks 
